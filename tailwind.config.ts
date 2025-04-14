@@ -18,7 +18,20 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'serif': ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+			},
 			colors: {
+				'adagio': {
+					DEFAULT: '#2c3e50',
+					light: '#3e5771',
+					dark: '#1a2530',
+				},
+				'piano': {
+					DEFAULT: '#EBEFEF',
+					light: '#F9FAFA',
+					dark: '#D1D5D5',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
