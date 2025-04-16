@@ -1,144 +1,125 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { toast } from "sonner";
 import Header from '@/components/Header';
 import { pianos } from '@/data/pianos';
 import { useCart } from '@/contexts/CartContext';
-import { MinusCircle, PlusCircle } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
-const ProductDetail = () => {
+export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [quantity, setQuantity] = React.useState(1);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   
-  const productId = parseInt(id || '0');
-  const piano = pianos.find(p => p.id === productId);
+  const pianoId = parseInt(id || '0');
+  const piano = pianos.find(piano => piano.id === pianoId);
+  
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
   
   if (!piano) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-serif mb-4">Producto no encontrado</h1>
-            <Button onClick={() => navigate('/')}>
-              Volver a la tienda
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <div>Piano no encontrado</div>;
   }
   
-  const increaseQuantity = () => setQuantity(prev => prev + 1);
-  const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
-  
   const handleAddToCart = () => {
-    addToCart({
-      ...piano,
-      quantity
-    });
+    if (!isAuthenticated) {
+      // Redirect to login if not authenticated
+      navigate('/login', { state: { from: { pathname: `/product/${id}` } } });
+      return;
+    }
     
-    navigate('/cart');
+    addToCart(piano);
+    toast.success(`${piano.name} ${piano.model} añadido al carrito`);
   };
+
+  // Mock description and specs
+  const description = "Este magnífico piano ofrece una calidad de sonido excepcional con una mecánica precisa y respuesta dinámica. Ideal para músicos profesionales y aficionados exigentes que buscan un instrumento de alto rendimiento y elegante diseño.";
   
+  const specs = {
+    dimensions: "Length: 211cm | Width: 148cm | Height: 102cm",
+    weight: "500 kg",
+    finish: "High-gloss polyester",
+    keyboard: "88 keys with Ebony and Spruce keytops",
+    construction: "Solid Spruce soundboard, Maple rim"
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
       
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Product Image */}
-          <div className="bg-[#EBEFEF] rounded-lg flex items-center justify-center p-6">
-            <img 
-              src={piano.image} 
-              alt={`${piano.name} ${piano.model}`}
-              className="max-w-full h-auto"
-            />
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Images */}
+          <div className="bg-[#EBEFEF] rounded-lg p-4 flex flex-col">
+            <div className="overflow-hidden rounded-lg mb-4">
+              <img 
+                src={piano.image} 
+                alt={`${piano.name} ${piano.model}`} 
+                className="w-full h-auto object-contain"
+              />
+            </div>
           </div>
           
-          {/* Product Details */}
+          {/* Details */}
           <div className="flex flex-col">
-            <div className="mb-8">
-              <h1 className="text-3xl font-serif font-bold text-[#2c3e50] mb-2">{piano.name}</h1>
-              <h2 className="text-xl text-[#2c3e50] mb-4">{piano.model}</h2>
-              <p className="text-2xl font-bold text-[#2c3e50] mb-2">{piano.price} €</p>
-              {piano.rentOption && (
-                <p className="text-gray-500 mb-6">
-                  Opción a compra: {piano.rentOption} €/mes
-                </p>
-              )}
-              <p className="text-[#2c3e50] mb-8">{piano.description}</p>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#2c3e50] tracking-wide uppercase">
+              {piano.name}
+            </h1>
+            <h2 className="text-xl text-gray-600 mb-4">{piano.model}</h2>
+            
+            <p className="text-2xl font-bold text-[#2c3e50] mb-2">{piano.price} €</p>
+            {piano.rentOption && (
+              <p className="text-gray-500 mb-6">Opción a compra: {piano.rentOption} €/mes</p>
+            )}
+            
+            <div className="my-6">
+              <p className="text-gray-700 mb-4">{description}</p>
               
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-4 mb-6">
-                <span className="text-[#2c3e50]">Cantidad:</span>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={decreaseQuantity}
-                  >
-                    <MinusCircle className="h-5 w-5" />
-                  </Button>
-                  <span className="text-xl font-medium w-8 text-center">{quantity}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={increaseQuantity}
-                  >
-                    <PlusCircle className="h-5 w-5" />
-                  </Button>
+              <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-[#2c3e50]">Especificaciones</h3>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
                 </div>
-              </div>
-              
-              {/* Add to Cart Button */}
+                <CollapsibleContent className="pt-2">
+                  <div className="text-sm space-y-2">
+                    <p><strong>Dimensiones:</strong> {specs.dimensions}</p>
+                    <p><strong>Peso:</strong> {specs.weight}</p>
+                    <p><strong>Acabado:</strong> {specs.finish}</p>
+                    <p><strong>Teclado:</strong> {specs.keyboard}</p>
+                    <p><strong>Construcción:</strong> {specs.construction}</p>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+            
+            <div className="mt-auto space-y-4">
               <Button 
-                className="w-full bg-[#2c3e50] hover:bg-[#1a2530] text-white mb-8"
                 onClick={handleAddToCart}
+                className="w-full bg-[#2c3e50] hover:bg-[#1a2530]"
               >
                 AÑADIR AL CARRITO
               </Button>
-            </div>
-            
-            {/* Specifications */}
-            <div className="border-t pt-6">
-              <h3 className="text-xl font-serif font-semibold mb-4 text-[#2c3e50]">
-                Especificaciones
-              </h3>
-              <div className="grid grid-cols-2 gap-y-2">
-                {piano.specifications.map((spec, index) => (
-                  <div key={index} className={index % 2 === 0 ? "col-span-2 md:col-span-1" : "col-span-2 md:col-span-1"}>
-                    <p className="text-sm">
-                      <span className="font-medium">{spec.name}:</span> {spec.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Features */}
-            <div className="border-t mt-6 pt-6">
-              <h3 className="text-xl font-serif font-semibold mb-4 text-[#2c3e50]">
-                Características
-              </h3>
-              <ul className="list-disc list-inside space-y-1">
-                {piano.features.map((feature, index) => (
-                  <li key={index} className="text-sm text-[#2c3e50]">{feature}</li>
-                ))}
-              </ul>
+              
+              <Button 
+                variant="outline" 
+                className="w-full border-[#2c3e50] text-[#2c3e50]"
+                onClick={() => navigate('/')}
+              >
+                VOLVER
+              </Button>
             </div>
           </div>
         </div>
-      </main>
-      
-      <footer className="py-6 text-center text-gray-500 mt-12 border-t">
-        <p>© {new Date().getFullYear()} ADAGGIO - Piano Store. All rights reserved.</p>
-      </footer>
+      </div>
     </div>
   );
-};
-
-export default ProductDetail;
+}

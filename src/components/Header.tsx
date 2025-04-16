@@ -14,10 +14,12 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, Search, Menu, Music } from 'lucide-react';
+import { ShoppingBag, Search, Menu, Music, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { isAuthenticated, currentUser } = useAuth();
 
   const performSearch = () => {
     console.log('Searching for:', searchQuery);
@@ -49,6 +51,11 @@ const Header = () => {
                 <Link to="#" className="text-[#2c3e50] hover:text-[#8B5CF6] transition-colors">
                   Contact
                 </Link>
+                {isAuthenticated && (
+                  <Link to="/profile" className="text-[#2c3e50] hover:text-[#8B5CF6] transition-colors">
+                    Mi Perfil
+                  </Link>
+                )}
               </div>
             </SheetContent>
           </Sheet>
@@ -62,7 +69,7 @@ const Header = () => {
           </h1>
         </Link>
 
-        {/* Right side - Search and Cart icons */}
+        {/* Right side - Search, User and Cart icons */}
         <div className="flex items-center gap-6">
           <Dialog>
             <DialogTrigger asChild>
@@ -86,6 +93,16 @@ const Header = () => {
               </div>
             </DialogContent>
           </Dialog>
+          
+          {isAuthenticated ? (
+            <Link to="/profile">
+              <User className="h-6 w-6 text-[#2c3e50]" />
+            </Link>
+          ) : (
+            <Link to="/login">
+              <User className="h-6 w-6 text-[#2c3e50]" />
+            </Link>
+          )}
           
           <Link to="/cart">
             <ShoppingBag className="h-6 w-6 text-[#2c3e50]" />
