@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/table";
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from "sonner";
-import { usePianos } from '@/hooks/usePianos';
+import { usePianos, Piano } from '@/hooks/usePianos';
 
 interface PianoFormData {
-  id?: number;
+  id: number; // Changed from optional to required
   name: string;
   model: string;
   price: string;
@@ -32,6 +32,7 @@ const AdminDashboard = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [formData, setFormData] = useState<PianoFormData>({
+    id: Date.now(), // Initialize with a default ID
     name: '',
     model: '',
     price: '',
@@ -49,6 +50,7 @@ const AdminDashboard = () => {
 
   const resetForm = () => {
     setFormData({
+      id: Date.now(), // Use current timestamp as default ID
       name: '',
       model: '',
       price: '',
@@ -61,15 +63,14 @@ const AdminDashboard = () => {
   const handleAddPiano = () => {
     addPiano({
       ...formData,
-      price: formData.price,
-      id: Date.now() // Simple unique ID for demo
+      id: Date.now() // Ensure a unique ID when adding
     });
     toast.success('Piano añadido correctamente');
     setIsAddDialogOpen(false);
     resetForm();
   };
 
-  const handleEditPiano = (piano: any) => {
+  const handleEditPiano = (piano: Piano) => {
     setFormData(piano);
     setIsEditDialogOpen(true);
   };
@@ -227,3 +228,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

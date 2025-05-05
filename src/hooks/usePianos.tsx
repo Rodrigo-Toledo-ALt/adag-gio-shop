@@ -10,6 +10,7 @@ export interface Piano {
   image: string;
   rentOption?: string;
   description?: string;
+  quantity?: number; // Add quantity as optional for compatibility with CartContext
 }
 
 export const usePianos = () => {
@@ -43,3 +44,4 @@ export const usePianos = () => {
     deletePiano
   };
 };
+

@@ -33,7 +33,11 @@ export default function ProductDetail() {
       return;
     }
     
-    addToCart(piano);
+    // Add quantity property to match Piano type in CartContext
+    addToCart({
+      ...piano,
+      quantity: 1 // Default quantity when adding to cart
+    });
     toast.success(`${piano.name} ${piano.model} añadido al carrito`);
   };
 
@@ -123,3 +127,4 @@ export default function ProductDetail() {
     </div>
   );
 }
+
